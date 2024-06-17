@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "supervisory_controller.hpp"
 #include "test_can.hpp"
 
 using namespace std;
@@ -11,7 +12,8 @@ int main(int argc, char* argv[]){
         cerr << "Error: too many inputs" << endl;
         Help();
     } else if (argc == 1) {
-        cout << "run main program" << endl;
+        SupervisoryController controller = SupervisoryController();
+        controller.run();
     } else {
         string cmd = string(argv[1]);
 
