@@ -1,14 +1,18 @@
 #include <iostream>
 
+#include "can.hpp"
+#include "database.hpp"
 #include "supervisory_controller.hpp"
-#include "test_can.hpp"
 
 using namespace std;
 
-void Help();
+static void Help();
+static void TestCan();
+static void TestDatabase();
+static void TestNFC();
 
-int main(int argc, char* argv[]){
-    if (argc > 2){
+int main(int argc, char* argv[]) {
+    if (argc > 2) {
         cerr << "Error: too many inputs" << endl;
         Help();
     } else if (argc == 1) {
@@ -20,9 +24,9 @@ int main(int argc, char* argv[]){
         if (cmd == "--test-can") {
             TestCan();
         } else if (cmd == "--test-nfc") {
-            cerr << "not implemented" << endl;
+            TestNFC();
         } else if (cmd == "--test-database") {
-            cerr << "not implemented" << endl;
+            TestDatabase();
         } else if (cmd == "--help") {
             Help();
         } else {
@@ -34,11 +38,76 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-void Help() {
+static void Help() {
     cout << "Usage: ./main <options>" << endl;
     cout << "Options:" << endl;
     cout << "--help" << endl;
     cout << "--test-can" << endl;
     cout << "--test-nfc" << endl;
     cout << "--test-database" << endl;
+}
+
+static void TestCan() {
+    int cmd = 0;
+    Can can = Can(0x100);
+
+    cout << "1. Transmit command" << endl;
+    cout << "2. Echo received commands" << endl;
+
+    while (cmd < 1 || cmd > 2) {
+        scanf("%d", &cmd);
+        if (cmd < 1 || cmd > 2) {
+            cerr << "Error: invalid option" << endl;
+        }
+    }
+
+    switch (cmd) {
+        case 1: {
+            // Test CAN TX
+            int id = 0;
+            int data = 0; 
+
+            cout << "Enter ID for CAN message" << endl;
+            scanf("%d", &id);
+            can.set_id(id);
+
+            cout << "Enter data for CAN message" << endl;
+            scanf("%d", &data);
+
+            printf("[CAN] TX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n", id, 1, data);
+            can.tx(data);
+            break;
+
+        }
+        case 2: {
+            // Test CAN RX
+            while (true) {
+                TPCANMsg msg = can.rx();
+                printf("[CAN] RX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
+                       (int)msg.ID, 
+                       (int)msg.LEN,
+                       (int)msg.DATA[0]);
+
+                can.tx(msg.DATA[0]);
+            }
+            break;
+        }
+        default:
+            cerr << "should be unreachable" << endl;
+            break;
+    }
+}
+
+static void TestDatabase() {
+    Database database = Database();
+    int floor_number = 1;
+    database.set_floor_number(floor_number);
+    printf("Set floor number to: %d", floor_number);
+    
+    floor_number = database.get_floor_number();
+    printf("Got floor number: %d", floor_number);
+}
+
+static void TestNFC() {
+    cout << "Not implemented" << endl;
 }
