@@ -18,6 +18,7 @@ Can::Can(int id) {
 void Can::close() {
     CAN_Close(m_handle);
 
+    printf("[CAN] close\n");
     return;
 }
 
@@ -29,6 +30,9 @@ void Can::open() {
 	status = CAN_Init(m_handle, CAN_BAUD_125K, CAN_INIT_TYPE_ST);
 	status = CAN_Status(m_handle);
 
+    printf("[CAN] init\n");
+    printf("[CAN] open\n");
+
     return;
 }
 
@@ -37,10 +41,11 @@ TPCANMsg Can::rx() {
     DWORD status;
 
     while ((status = CAN_Read(m_handle, &msg)) == PCAN_RECEIVE_QUEUE_EMPTY) {
-        usleep(100000);
+        sleep(1);
     }
 
     if (status != PCAN_NO_ERROR) {
+        printf("[CAN] Error 0x%x\n", (int)status);
         msg.ID = 0; // NOTE: Set ID to 0 so we can check for error in calling function.
     }
     
@@ -51,7 +56,7 @@ void Can::set_id(int id) {
     m_tx.ID = id;
 }
 
-void Can::tx(int data, int data_length = 1, int msg_type = MSGTYPE_STANDARD) {
+void Can::tx(int data, int data_length, int msg_type) {
     DWORD status;
     m_tx.DATA[0] = data;
     m_tx.LEN = data_length;
@@ -63,6 +68,11 @@ void Can::tx(int data, int data_length = 1, int msg_type = MSGTYPE_STANDARD) {
     // out CAN_Write() with a different function for testing.
     // (compile time substitution)
 	status = CAN_Write(m_handle, &m_tx);
+
+    printf("[CAN] TX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
+           (int)m_tx.ID,
+           (int)m_tx.LEN,
+           (int)m_tx.DATA[0]);
 
     return;
 }

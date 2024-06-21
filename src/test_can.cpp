@@ -25,6 +25,7 @@ void TestCan() {
 
 static void echo_rx() {
     Can can = Can(0x100);
+    can.open();
 
     while (true) {
         TPCANMsg msg = can.rx();

@@ -1,6 +1,10 @@
 # Variable declaration
 CC=g++
 CFLAGS=-g -Wall
+
+LDIR =-L/usr/lib/arm-linux-gnueabihf
+LIBS=-l:libmysqlcppconn.so -lpcan
+
 SRC=src
 OBJ=obj
 BIN=bin
@@ -20,7 +24,7 @@ release: $(TARGET)
 # Create binary files and object files
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN)
-	$(CC) $(CFLAGS) $(OBJS) -o $@
+	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDIR) $(LIBS)
 
 $(OBJ)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(OBJ)
