@@ -106,7 +106,7 @@ static void TestCan() {
 
 static void TestDatabase() {
     Database database = Database();
-    int floor_number = 1;
+    int floor_number = 3;
     database.set_floor_number(floor_number);
     printf("Set floor number to: %d", floor_number);
     

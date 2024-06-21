@@ -36,7 +36,6 @@ int Database::get_floor_number() {
 	return floor_number;
 }
  
- 
 int Database::set_floor_number(int floor_number) {
     int error_code = -1;
 	sql::Driver *driver; 				// Create a pointer to a MySQL driver object
@@ -47,7 +46,7 @@ int Database::set_floor_number(int floor_number) {
 
     if (floor_number >= 1 && floor_number <= 3) {
         driver = get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "ese", "ese");	
+        con = driver->connect("tcp://127.0.0.1:3306", "elevator1", "elevator1");
         con->setSchema("elevator");										
 
         // TODO: possibly not necessary
