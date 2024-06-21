@@ -38,7 +38,7 @@ int Database::get_floor_number() {
  
  
 int Database::set_floor_number(int floor_number) {
-    int errno = -1;
+    int error_code = -1;
 	sql::Driver *driver; 				// Create a pointer to a MySQL driver object
 	sql::Connection *con; 				// Create a pointer to a database connection object
 	sql::Statement *stmt;				// Crealte a pointer to a Statement object to hold statements 
@@ -61,7 +61,7 @@ int Database::set_floor_number(int floor_number) {
         pstmt->setInt(1, floor_number);
         pstmt->executeUpdate();
 
-        errno = 0;
+        error_code = 0;
     } else {
         printf("ERROR: Given floor number (%d) is not valid", floor_number);
     }
@@ -71,5 +71,5 @@ int Database::set_floor_number(int floor_number) {
 	delete stmt;
 	delete con;
 
-    return errno;
+    return error_code;
 } 
