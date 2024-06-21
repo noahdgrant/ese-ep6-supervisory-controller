@@ -50,6 +50,7 @@ static void Help() {
 static void TestCan() {
     int cmd = 0;
     Can can = Can(0x100);
+    can.open();
 
     cout << "1. Transmit command" << endl;
     cout << "2. Echo received commands" << endl;
@@ -83,12 +84,17 @@ static void TestCan() {
             // Test CAN RX
             while (true) {
                 TPCANMsg msg = can.rx();
-                printf("[CAN] RX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
-                       (int)msg.ID, 
-                       (int)msg.LEN,
-                       (int)msg.DATA[0]);
 
-                can.tx(msg.DATA[0]);
+                if(msg.ID != 0x01 && msg.LEN != 0x04) { // Ignore bus status messages
+                    printf("[CAN] RX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
+                           (int)msg.ID,
+                           (int)msg.LEN,
+                           (int)msg.DATA[0]);
+
+                    if (msg.ID != 0x101) { // Don't repeat elevator controller messages
+                        can.tx(msg.DATA[0]);
+                    }
+                }
             }
             break;
         }
