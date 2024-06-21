@@ -108,10 +108,10 @@ static void TestDatabase() {
     Database database = Database();
     int floor_number = 3;
     database.set_floor_number(floor_number);
-    printf("Set floor number to: %d", floor_number);
+    printf("Set floor number to: %d\n", floor_number);
     
     floor_number = database.get_floor_number();
-    printf("Got floor number: %d", floor_number);
+    printf("Got floor number: %d\n", floor_number);
 }
 
 static void TestNFC() {
