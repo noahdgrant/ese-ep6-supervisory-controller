@@ -1,12 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <unistd.h> 
-#include <signal.h>
-#include <string.h>
 #include <fcntl.h>    					// O_RDWR
 #include <unistd.h>
-#include <ctype.h>
 #include <libpcan.h>   					// PCAN library
 
 #include "can.hpp"
@@ -62,7 +58,6 @@ void Can::tx(int data, int data_length, int msg_type) {
     m_tx.LEN = data_length;
     m_tx.MSGTYPE = msg_type;
 
-	sleep(1);  
     // TODO: error check status
     // TODO: look at TDD book and see how I can test this function by subbing
     // out CAN_Write() with a different function for testing.

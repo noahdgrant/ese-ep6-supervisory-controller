@@ -2,6 +2,7 @@
 #define SUPERVISORY_CONTROLLER_HPP
 
 #include "can.hpp"
+#include "database.hpp"
 
 class SupervisoryController {
 public:
@@ -11,6 +12,7 @@ public:
 
 private:
     Can m_can;
+    Database m_database;
 };
 
 #endif

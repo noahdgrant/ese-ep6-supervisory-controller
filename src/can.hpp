@@ -1,10 +1,10 @@
 #ifndef CAN_HPP
 #define CAN_HPP
 
-#include <libpcan.h>   					// PCAN library
+#include <libpcan.h>
 
-#define PCAN_RECEIVE_QUEUE_EMPTY        0x00020U  	// Receive queue is empty
-#define PCAN_NO_ERROR               	0x00000U  	// No error 
+#define PCAN_RECEIVE_QUEUE_EMPTY    0x00020U
+#define PCAN_NO_ERROR               0x00000U
 
 class Can {
 public:
