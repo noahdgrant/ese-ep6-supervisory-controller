@@ -1,16 +1,25 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
+#include <stdint.h>
+
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
 #include <cppconn/prepared_statement.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #include <mysql_connection.h>
 
 #include "database.hpp"
  
 using namespace std; 
+
+Database::Database(string port, string username, string password, string schema) {
+    m_port = port;
+    m_username = username;
+    m_password = password;
+    m_schema = schema;
+}
  
 int Database::get_floor_number() {
     int floor_number = -1; 
@@ -20,8 +29,8 @@ int Database::get_floor_number() {
 	sql::ResultSet *res;			// Create a pointer to a ResultSet object to hold results 
 	
 	driver = get_driver_instance();
-	con = driver->connect("tcp://127.0.0.1:3306", "ese", "ese");	
-	con->setSchema("elevator");		
+	con = driver->connect(m_port, m_username, m_password);
+	con->setSchema(m_schema);
 	
 	stmt = con->createStatement();
 	res = stmt->executeQuery("SELECT currentFloor FROM elevatorNetwork WHERE nodeID = 1");	// message query
@@ -46,8 +55,8 @@ int Database::set_floor_number(int floor_number) {
 
     if (floor_number >= 1 && floor_number <= 3) {
         driver = get_driver_instance();
-        con = driver->connect("tcp://127.0.0.1:3306", "elevator1", "elevator1");
-        con->setSchema("elevator");										
+        con = driver->connect(m_port, m_username, m_password);
+        con->setSchema(m_schema);
 
         // TODO: possibly not necessary
         stmt = con->createStatement();
@@ -71,4 +80,24 @@ int Database::set_floor_number(int floor_number) {
 	delete con;
 
     return error_code;
-} 
+}
+
+void Database::insert_request_history(string request_method, uint8_t floor_number) {
+	sql::Driver *driver;
+	sql::Connection *con;
+	sql::PreparedStatement *pstmt;
+
+    driver = get_driver_instance();
+    con = driver->connect(m_port, m_username, m_password);
+    con->setSchema(m_schema);
+
+    pstmt = con->prepareStatement("INSERT INTO request_history(method, floor) VALUES (?,?)");
+    pstmt->setString(1, request_method);
+    pstmt->setInt(2, floor_number);
+    pstmt->executeUpdate();
+
+	delete pstmt;
+	delete con;
+
+    return;
+}
