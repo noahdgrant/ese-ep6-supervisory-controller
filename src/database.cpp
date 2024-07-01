@@ -33,6 +33,8 @@ void Database::insert_floor_history(uint8_t floor_number) {
     pstmt->setInt(1, floor_number);
     pstmt->executeUpdate();
 
+    printf("[DB] FloorHistory: floor number = %d\n", floor_number);
+
 	delete pstmt;
 	delete con;
 
@@ -52,6 +54,8 @@ void Database::insert_request_history(string request_method, uint8_t floor_numbe
     pstmt->setString(1, request_method);
     pstmt->setInt(2, floor_number);
     pstmt->executeUpdate();
+
+    printf("[DB] RequestHistory: method = %s floor number = %d\n", request_method.c_str(), floor_number);
 
 	delete pstmt;
 	delete con;
