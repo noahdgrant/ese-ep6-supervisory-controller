@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdint.h>
 
 #include "can.hpp"
 #include "database.hpp"
@@ -105,13 +106,11 @@ static void TestCan() {
 }
 
 static void TestDatabase() {
-    Database database = Database();
-    int floor_number = 3;
-    database.set_floor_number(floor_number);
-    printf("Set floor number to: %d\n", floor_number);
-    
-    floor_number = database.get_floor_number();
-    printf("Got floor number: %d\n", floor_number);
+    Database database = Database("tcp://127.0.0.1:3306", "elevator1", "elevator1", "ElevatorOneTest");
+    uint8_t floor_number = 1;
+    char request_method[] = "FloorOneController";
+    database.insert_request_history(request_method, floor_number);
+    printf("Inserted into request history: method = %s floor number = %d\n", request_method, floor_number);
 }
 
 static void TestNFC() {

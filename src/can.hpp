@@ -3,6 +3,13 @@
 
 #include <libpcan.h>
 
+#define SUPERVISORY_CONTROLLER      0x100
+#define ELEVATOR_CONTROLLER         0x101
+#define CAR_CONTROLLER              0x200
+#define FLOOR_ONE_CONTROLLER        0x201
+#define FLOOR_TWO_CONTROLLER        0x202
+#define FLOOR_THREE_CONTROLLER      0x203
+
 #define PCAN_RECEIVE_QUEUE_EMPTY    0x00020U
 #define PCAN_NO_ERROR               0x00000U
 
