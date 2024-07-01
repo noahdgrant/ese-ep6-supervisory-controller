@@ -47,7 +47,7 @@ void SupervisoryController::run() {
                     break;
             }
             m_database.insert_request_history(request_method, msg.DATA[0]);
-            printf("[DB] RequestHistory: method = %s floor number = %d\n", request_method, msg.DATA[0]);
+            printf("[DB] RequestHistory: method = %s floor number = %d\n", request_method.c_str(), msg.DATA[0]);
             m_can.tx(msg.DATA[0]);
         }
     }
