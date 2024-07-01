@@ -43,6 +43,13 @@ TPCANMsg Can::rx() {
     if (status != PCAN_NO_ERROR) {
         printf("[CAN] Error 0x%x\n", (int)status);
         msg.ID = 0; // NOTE: Set ID to 0 so we can check for error in calling function.
+    } else if(msg.ID == 0x01 && msg.LEN == 0x04) {
+        printf("[CAN] RX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
+               (int)msg.ID,
+               (int)msg.LEN,
+               (int)msg.DATA[0]);
+    } else {
+        // Ignore bus status messages
     }
     
     return msg;
