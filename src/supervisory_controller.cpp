@@ -8,7 +8,7 @@
 
 using namespace std;
 
-static void print_queue(deque<uint8_t> queue) {
+static void QueuePrint(deque<uint8_t>& queue) {
     printf("[QUEUE]");
     if (!queue.empty()) {
         for (auto item : queue) {
@@ -20,10 +20,32 @@ static void print_queue(deque<uint8_t> queue) {
     }
 }
 
+static void QueueAdd(deque<uint8_t>& queue, int current_floor, int new_floor) {
+    // NOTE: Only add floors to the queue that are not already in the queue.
+    // If a floor is already in the queue, then it doesn't need to be added
+    // again since everyone waiting for the floor can get in the elevator
+    // at the same time.
+    if (find(queue.begin(), queue.end(), new_floor) == queue.end()) {
+        if (queue.empty()) {
+            queue.push_back(new_floor);
+        } else {
+            if (current_floor < new_floor) {
+                // Elevator is moving up
+                auto it = find_if(queue.begin(), queue.end(), [&](int floor) { return floor > new_floor; });
+                queue.insert(it, new_floor);
+            } else {
+                // Elevator is moving down
+                auto it = find_if(queue.rbegin(), queue.rend(), [&](int floor) { return floor < new_floor; });
+                queue.insert(it.base(), new_floor);
+            }
+        }
+    }
+}
+
 void SupervisoryController::run() {
     deque<uint8_t> request_queue;
     uint8_t next_floor = 0;
-    uint8_t last_floor = 0;
+    uint8_t current_floor = 0;
     string request_method = "";
     uint8_t floor_number = 0;
     bool waiting = false;
@@ -42,7 +64,7 @@ void SupervisoryController::run() {
         }
 
         if (msg.ID == ELEVATOR_CONTROLLER) {
-            if (last_floor != msg.DATA[0] && next_floor == msg.DATA[0]) {
+            if (current_floor != msg.DATA[0] && next_floor == msg.DATA[0]) {
                 switch(msg.DATA[0]){
                     case 0x5:
                         floor_number = 1;
@@ -56,10 +78,9 @@ void SupervisoryController::run() {
                     default:
                         break;
                 }
-                m_database.insert_floor_history(floor_number);
-                printf("[DB] FloorHistory: floor number = %d\n", floor_number);
 
-                last_floor = msg.DATA[0];
+                m_database.insert_floor_history(floor_number);
+                current_floor = msg.DATA[0];
                 waiting = false;
             }
         } else {
@@ -81,17 +102,8 @@ void SupervisoryController::run() {
             }
 
             m_database.insert_request_history(request_method, floor_number);
-            printf("[DB] RequestHistory: method = %s floor number = %d\n", request_method.c_str(), floor_number);
-
-            // Only add floors to the queue that are not already in the queue.
-            // If a floor is already in the queue, then it doesn't need to be added
-            // again since everyone waiting for the floor can get in the elevator
-            // at the same time.
-            if (find(request_queue.begin(), request_queue.end(), floor_number) == request_queue.end()) {
-                // TODO: organize queue to increase efficiency
-                request_queue.push_back(floor_number);
-                print_queue(request_queue);
-            }
+            QueueAdd(request_queue, current_floor - 4, floor_number); // NOTE: -4 converts to true floor number
+            QueuePrint(request_queue);
         }
 
         // TODO: Check database to see if a floor has been requested from the website
@@ -112,7 +124,7 @@ void SupervisoryController::run() {
             }
 
             request_queue.pop_front();
-            print_queue(request_queue);
+            QueuePrint(request_queue);
             m_can.tx(next_floor);
             waiting = true;
         }
