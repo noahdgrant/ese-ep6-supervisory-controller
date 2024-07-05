@@ -36,6 +36,7 @@ vector<uint8_t> Database::get_new_website_requests() {
     pstmt = con->prepareStatement("SELECT * FROM RequestHistory WHERE Method = ? AND Id > ? ORDER BY Id");
     pstmt->setString(1, "Website");
     pstmt->setInt(2, m_last_website_request_id);
+    res = pstmt->executeQuery();
 
     while (res->next()) {
         m_last_website_request_id = res->getInt("Id");

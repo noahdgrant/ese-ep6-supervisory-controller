@@ -26,6 +26,10 @@ void Can::open() {
 	status = CAN_Init(m_handle, CAN_BAUD_125K, CAN_INIT_TYPE_ST);
 	status = CAN_Status(m_handle);
 
+    if (status != PCAN_NO_ERROR) {
+        printf("[CAN] Error 0x%x\n", (int)status);
+    }
+
     printf("[CAN] init\n");
     printf("[CAN] open\n");
 
@@ -70,6 +74,9 @@ void Can::tx(int data, int data_length, int msg_type) {
     // out CAN_Write() with a different function for testing.
     // (compile time substitution)
 	status = CAN_Write(m_handle, &m_tx);
+    if (status != PCAN_NO_ERROR) {
+        printf("[CAN] Error 0x%x\n", (int)status);
+    }
 
     printf("[CAN] TX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
            (int)m_tx.ID,
