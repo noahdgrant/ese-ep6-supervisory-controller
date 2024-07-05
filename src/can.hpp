@@ -1,6 +1,8 @@
 #ifndef CAN_HPP
 #define CAN_HPP
 
+#include <stdint.h>
+
 #include <libpcan.h>
 
 #define SUPERVISORY_CONTROLLER      0x100
@@ -26,6 +28,7 @@ public:
 private:
     HANDLE m_handle;
     TPCANMsg m_tx;
+    uint8_t m_last_floor;
 };
 
 #endif
