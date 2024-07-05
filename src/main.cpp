@@ -109,7 +109,7 @@ static void TestDatabase() {
     Database database = Database("tcp://127.0.0.1:3306", "elevator1", "elevator1", "ElevatorOneTest");
     uint8_t floor_number = 1;
     char request_method[] = "FloorOneController";
-    database.insert_request_history(request_method, floor_number);
+    database.update_request_history(request_method, floor_number);
     printf("Inserted into request history: method = %s floor number = %d\n", request_method, floor_number);
 }
 

@@ -40,7 +40,7 @@ vector<uint8_t> Database::get_new_website_requests() {
     while (res->next()) {
         m_last_website_request_id = res->getInt("Id");
         floors.push_back(res->getInt("Floor"));
-        printf("[DB] New website request ID = %ld Floor = %d\n", res->getInt("Id"), res->getInt("Floor"));
+        printf("[DB] New website request ID = %d Floor = %d\n", res->getInt("Id"), res->getInt("Floor"));
     }
 
     delete con;
@@ -68,7 +68,7 @@ void Database::read_last_website_request() {
         m_last_website_request_id = res->getInt("Id");
     }
 
-    printf("[DB] Last website request ID = %ld\n", m_last_website_request_id);
+    printf("[DB] Last website request ID = %lld\n", m_last_website_request_id);
 
     delete con;
     delete pstmt;
