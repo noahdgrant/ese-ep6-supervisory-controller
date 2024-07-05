@@ -9,18 +9,6 @@
 
 using namespace std;
 
-static void QueuePrint(deque<uint8_t>& queue) {
-    printf("[QUEUE]");
-    if (!queue.empty()) {
-        for (auto item : queue) {
-            printf(" %d", item);
-        }
-        printf("\n");
-    } else {
-        printf(" is empty\n");
-    }
-}
-
 static void QueueAdd(deque<uint8_t>& queue, int current_floor, int new_floor) {
     // NOTE: Only add floors to the queue that are not already in the queue.
     // If a floor is already in the queue, then it doesn't need to be added
@@ -43,6 +31,18 @@ static void QueueAdd(deque<uint8_t>& queue, int current_floor, int new_floor) {
     }
 }
 
+static void QueuePrint(deque<uint8_t>& queue) {
+    printf("[QUEUE]");
+    if (!queue.empty()) {
+        for (auto item : queue) {
+            printf(" %d", item);
+        }
+        printf("\n");
+    } else {
+        printf(" is empty\n");
+    }
+}
+
 void SupervisoryController::run() {
     deque<uint8_t> request_queue;
     uint8_t next_floor = 0;
@@ -51,6 +51,9 @@ void SupervisoryController::run() {
     string request_method = "";
     uint8_t floor_number = 0;
     bool waiting = false;
+    vector<uint8_t> website_requests;
+
+    m_database.read_last_website_request();
 
     m_can.open();
 
@@ -82,7 +85,7 @@ void SupervisoryController::run() {
                         break;
                 }
 
-                m_database.insert_floor_history(floor_number);
+                m_database.update_floor_history(floor_number);
                 last_floor = current_floor;
                 waiting = false;
             }
@@ -106,12 +109,15 @@ void SupervisoryController::run() {
 
             floor_number = msg.DATA[0] - 4; // NOTE: -4 converts to true floor number
 
-            m_database.insert_request_history(request_method, floor_number);
+            m_database.update_request_history(request_method, floor_number);
             QueueAdd(request_queue, current_floor - 4, floor_number); // NOTE: -4 converts to true floor number
             QueuePrint(request_queue);
         }
 
-        // TODO: Check database to see if a floor has been requested from the website
+        website_requests = m_database.get_new_website_requests();
+        for (auto floor : website_requests) {
+            QueueAdd(request_queue, current_floor - 4, floor); // NOTE: -4 converts to true floor number
+        }
 
         if (!request_queue.empty() && !waiting) {
             switch (request_queue.front()) {
