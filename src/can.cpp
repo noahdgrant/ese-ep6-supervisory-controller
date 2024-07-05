@@ -49,7 +49,7 @@ TPCANMsg Can::rx() {
                (int)msg.ID,
                (int)msg.LEN,
                (int)msg.DATA[0]);
-        m_last_floor == msg.DATA[0];
+        m_last_floor = msg.DATA[0];
     } else {
         printf("[CAN] RX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
                (int)msg.ID,
