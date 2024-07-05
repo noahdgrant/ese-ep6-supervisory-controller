@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "supervisory_controller.hpp"
+#include "can.hpp"
 
 using namespace std;
 
@@ -85,21 +86,23 @@ void SupervisoryController::run() {
             }
         } else {
             switch (msg.ID) {
+                case CAR_CONTROLLER:
+                    request_method = "CarController";
+                    break;
                 case FLOOR_ONE_CONTROLLER:
                     request_method = "FloorOneController";
-                    floor_number = 1;
                     break;
                 case FLOOR_TWO_CONTROLLER:
                     request_method = "FloorTwoController";
-                    floor_number = 2;
                     break;
                 case FLOOR_THREE_CONTROLLER:
                     request_method = "FloorThreeController";
-                    floor_number = 3;
                     break;
                 default:
                     break;
             }
+
+            floor_number = msg.DATA[0] - 4; // NOTE: -4 converts to true floor number
 
             m_database.insert_request_history(request_method, floor_number);
             QueueAdd(request_queue, current_floor - 4, floor_number); // NOTE: -4 converts to true floor number
@@ -123,9 +126,9 @@ void SupervisoryController::run() {
                     break;
             }
 
+            m_can.tx(next_floor);
             request_queue.pop_front();
             QueuePrint(request_queue);
-            m_can.tx(next_floor);
             waiting = true;
         }
     }
