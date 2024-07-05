@@ -43,6 +43,20 @@ static void QueueAdd(deque<uint8_t>& queue, int current_floor, int new_floor) {
     }
 }
 
+using namespace std;
+
+static void print_queue(deque<uint8_t> queue) {
+    printf("[QUEUE]");
+    if (!queue.empty()) {
+        for (auto item : queue) {
+            printf(" %d", item);
+        }
+        printf("\n");
+    } else {
+        printf(" is empty\n");
+    }
+}
+
 void SupervisoryController::run() {
     deque<uint8_t> request_queue;
     uint8_t next_floor = 0;
