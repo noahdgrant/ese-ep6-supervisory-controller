@@ -44,12 +44,14 @@ TPCANMsg Can::rx() {
         msg.ID = 0; // NOTE: Set ID to 0 so we can check for error in calling function.
     } else if(msg.ID == 0x01 && msg.LEN == 0x04) {
         // Ignore bus status messages
-    } else if (msg.ID == ELEVATOR_CONTROLLER && msg.DATA[0] != m_last_floor) {
-        printf("[CAN] RX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
-               (int)msg.ID,
-               (int)msg.LEN,
-               (int)msg.DATA[0]);
-        m_last_floor = msg.DATA[0];
+    } else if (msg.ID == ELEVATOR_CONTROLLER) {
+        if (msg.DATA[0] != m_last_floor) {
+            m_last_floor = msg.DATA[0];
+            printf("[CAN] RX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
+                   (int)msg.ID,
+                   (int)msg.LEN,
+                   (int)msg.DATA[0]);
+        }
     } else {
         printf("[CAN] RX: ID = 0x%X LEN = 0x%X DATA = 0x%X \n",
                (int)msg.ID,
