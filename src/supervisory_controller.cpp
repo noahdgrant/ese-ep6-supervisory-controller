@@ -87,6 +87,9 @@ void SupervisoryController::run() {
     string request_method = "";
     uint8_t floor_number = 0;
     bool waiting = false;
+    vector<uint8_t> website_requests;
+
+    m_database.read_last_website_request();
 
     m_can.open();
 
@@ -147,7 +150,10 @@ void SupervisoryController::run() {
             QueuePrint(request_queue);
         }
 
-        // TODO: Check database to see if a floor has been requested from the website
+        website_requests = m_database.get_new_website_requests();
+        for (auto floor : website_requests) {
+            QueueAdd(request_queue, current_floor - 4, floor); // NOTE: -4 converts to true floor number
+        }
 
         if (!request_queue.empty() && !waiting) {
             switch (request_queue.front()) {
