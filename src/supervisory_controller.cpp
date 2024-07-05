@@ -47,6 +47,7 @@ void SupervisoryController::run() {
     deque<uint8_t> request_queue;
     uint8_t next_floor = 0;
     uint8_t current_floor = 0;
+    uint8_t last_floor = 0;
     string request_method = "";
     uint8_t floor_number = 0;
     bool waiting = false;
@@ -66,7 +67,7 @@ void SupervisoryController::run() {
 
         if (msg.ID == ELEVATOR_CONTROLLER) {
             current_floor = msg.DATA[0];
-            if (next_floor == current_floor) {
+            if (next_floor == current_floor && current_floor != last_floor) {
                 switch(current_floor){
                     case 0x5:
                         floor_number = 1;
@@ -82,6 +83,7 @@ void SupervisoryController::run() {
                 }
 
                 m_database.insert_floor_history(floor_number);
+                last_floor = current_floor;
                 waiting = false;
             }
         } else {
