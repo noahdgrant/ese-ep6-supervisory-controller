@@ -37,7 +37,7 @@ TPCANMsg Can::rx() {
     DWORD status;
 
     while ((status = CAN_Read(m_handle, &msg)) == PCAN_RECEIVE_QUEUE_EMPTY) {
-        sleep(1);
+        usleep(250000);
     }
 
     if (status != PCAN_NO_ERROR) {

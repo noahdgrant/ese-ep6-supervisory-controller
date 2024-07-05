@@ -65,8 +65,9 @@ void SupervisoryController::run() {
         }
 
         if (msg.ID == ELEVATOR_CONTROLLER) {
-            if (current_floor != msg.DATA[0] && next_floor == msg.DATA[0]) {
-                switch(msg.DATA[0]){
+            current_floor = msg.DATA[0];
+            if (next_floor == current_floor) {
+                switch(current_floor){
                     case 0x5:
                         floor_number = 1;
                         break;
@@ -81,7 +82,6 @@ void SupervisoryController::run() {
                 }
 
                 m_database.insert_floor_history(floor_number);
-                current_floor = msg.DATA[0];
                 waiting = false;
             }
         } else {
