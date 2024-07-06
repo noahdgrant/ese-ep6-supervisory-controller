@@ -14,8 +14,8 @@
  
 using namespace std; 
 
-Database::Database(string port, string username, string password, string schema) {
-    m_port = port;
+Database::Database(string ip, string username, string password, string schema) {
+    m_ip = ip;
     m_username = username;
     m_password = password;
     m_schema = schema;
@@ -30,7 +30,7 @@ vector<uint8_t> Database::get_new_website_requests() {
     vector<uint8_t> floors;
 
     driver = get_driver_instance();
-    con = driver->connect(m_port, m_username, m_password);
+    con = driver->connect(m_ip, m_username, m_password);
     con->setSchema(m_schema);
 
     pstmt = con->prepareStatement("SELECT * FROM RequestHistory WHERE Method = ? AND Id > ? ORDER BY Id");
@@ -58,7 +58,7 @@ void Database::read_last_website_request() {
     sql::ResultSet *res;
 
     driver = get_driver_instance();
-    con = driver->connect(m_port, m_username, m_password);
+    con = driver->connect(m_ip, m_username, m_password);
     con->setSchema(m_schema);
 
     pstmt = con->prepareStatement("SELECT * FROM RequestHistory WHERE Method = ? ORDER BY Id DESC LIMIT 1");
@@ -84,7 +84,7 @@ void Database::update_floor_history(uint8_t floor_number) {
 	sql::PreparedStatement *pstmt;
 
     driver = get_driver_instance();
-    con = driver->connect(m_port, m_username, m_password);
+    con = driver->connect(m_ip, m_username, m_password);
     con->setSchema(m_schema);
 
     pstmt = con->prepareStatement("INSERT INTO FloorHistory(floor) VALUES (?)");
@@ -105,7 +105,7 @@ void Database::update_request_history(string request_method, uint8_t floor_numbe
 	sql::PreparedStatement *pstmt;
 
     driver = get_driver_instance();
-    con = driver->connect(m_port, m_username, m_password);
+    con = driver->connect(m_ip, m_username, m_password);
     con->setSchema(m_schema);
 
     pstmt = con->prepareStatement("INSERT INTO RequestHistory(method, floor) VALUES (?,?)");
