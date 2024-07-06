@@ -83,6 +83,7 @@ void SupervisoryController::run() {
         website_requests = m_database.get_new_website_requests();
         for (auto floor : website_requests) {
             QueueAdd(request_queue, current_floor - 4, floor); // NOTE: -4 converts to true floor number
+            QueuePrint(request_queue);
         }
 
         if (!request_queue.empty() && !waiting) {
