@@ -9,26 +9,27 @@
 using namespace std;
 
 static void Help();
+static void TestAudio();
 static void TestCan();
 static void TestDatabase();
 static void TestNFC();
 
 int main(int argc, char* argv[]) {
+    LoadEnvironmentVariables(".env");
+
     if (argc > 2) {
         cerr << "Error: too many inputs" << endl;
         Help();
     } else if (argc == 1) {
-        LoadEnvironmentVariables(".env");
-
         SupervisoryController controller = SupervisoryController();
         controller.run();
     } else {
         string cmd = string(argv[1]);
 
-        if (cmd == "--test-can") {
+        if (cmd == "--test-audio") {
+            TestAudio();
+        } else if (cmd == "--test-can") {
             TestCan();
-        } else if (cmd == "--test-nfc") {
-            TestNFC();
         } else if (cmd == "--test-database") {
             TestDatabase();
         } else if (cmd == "--help") {
@@ -46,9 +47,15 @@ static void Help() {
     cout << "Usage: ./main <options>" << endl;
     cout << "Options:" << endl;
     cout << "--help" << endl;
+    cout << "--test-audio" << endl;
     cout << "--test-can" << endl;
-    cout << "--test-nfc" << endl;
     cout << "--test-database" << endl;
+}
+
+static void TestAudio() {
+    system("aplay ../audio/floor1.wav");
+    system("aplay ../audio/floor2.wav");
+    system("aplay ../audio/floor3.wav");
 }
 
 static void TestCan() {
@@ -109,13 +116,10 @@ static void TestCan() {
 }
 
 static void TestDatabase() {
-    Database database = Database("tcp://127.0.0.1:3306", "elevator1", "elevator1", "ElevatorOneTest");
+    Database database = Database(std::getenv("DATABASE_IP"), std::getenv("DATABASE_USERNAME"),
+                                 std::getenv("DATABASE_PASSWORD"), std::getenv("DATABASE_SCHEMA"));
     uint8_t floor_number = 1;
     char request_method[] = "FloorOneController";
     database.update_request_history(request_method, floor_number);
     printf("Inserted into request history: method = %s floor number = %d\n", request_method, floor_number);
-}
-
-static void TestNFC() {
-    cout << "Not implemented" << endl;
 }
