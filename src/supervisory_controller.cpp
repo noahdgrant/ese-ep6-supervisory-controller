@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <deque>
 #include <stdint.h>
 #include <string>
@@ -37,15 +38,18 @@ void SupervisoryController::run() {
         if (msg.ID == ELEVATOR_CONTROLLER) {
             current_floor = msg.DATA[0];
             if (next_floor == current_floor && current_floor != last_floor) {
-                switch(current_floor){
+                switch(current_floor) {
                     case 0x5:
                         floor_number = 1;
+                        system("aplay ../audio/floor1.wav");
                         break;
                     case 0x6:
                         floor_number = 2;
+                        system("aplay ../audio/floor2.wav");
                         break;
                     case 0x7:
                         floor_number = 3;
+                        system("aplay ../audio/floor3.wav");
                         break;
                     default:
                         break;
