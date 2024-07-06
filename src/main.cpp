@@ -3,6 +3,7 @@
 
 #include "can.hpp"
 #include "database.hpp"
+#include "environment.hpp"
 #include "supervisory_controller.hpp"
 
 using namespace std;
@@ -17,6 +18,8 @@ int main(int argc, char* argv[]) {
         cerr << "Error: too many inputs" << endl;
         Help();
     } else if (argc == 1) {
+        LoadEnvironmentVariables(".env");
+
         SupervisoryController controller = SupervisoryController();
         controller.run();
     } else {
