@@ -1,79 +1,86 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <iostream>
+#include <stdint.h>
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
 
-int main() {
-  int serial_port = open("/dev/ttyACM0", O_RDWR);
+#include "serial.hpp"
 
-  // Check for errors
-  if (serial_port < 0) {
-    std::cout << "Error " << errno << " opening " << "/dev/ttyACM0" << ": "
-              << strerror(errno) << std::endl;
-  }
+using namespace std;
 
-  // Create new termios struc, we call it 'tty' for convention
-  struct termios tty;
-  memset(&tty, 0, sizeof tty);
+uint8_t Serial::check_for_request() {
+    uint8_t floor_number = 0;
+    int bytes_read;
+    char buffer[256];
 
-  // Read in existing settings, and handle any error
-  if (tcgetattr(serial_port, &tty) != 0) {
-    std::cout << "Error " << errno << " from tcgetattr: " << strerror(errno)
-              << std::endl;
-  }
+    bytes_read = ::read(m_fd, buffer, sizeof(buffer));
+    if (bytes_read < 0) {
+        cerr << "[SERIAL] Error reading from serial port: " << strerror(errno) << endl;
+    } else if (bytes_read == 0) {
+        // Do nothing
+    } else {
+        if (strcmp(buffer, "one") == 0 ||
+            strcmp(buffer, "two") == 0 ||
+            strcmp(buffer, "three") == 0) {
+            if (strcmp(buffer, "one") == 0) {
+                floor_number = 1;
+            } else if (strcmp(buffer, "two") == 0) {
+                floor_number = 2;
+            } else {
+                floor_number = 3;
+            }
+        } else {
+            cout << "[SERIAL] Read from serial port: " << string(buffer, bytes_read) << endl;
+        }
+    }
 
-  tty.c_cflag &= ~PARENB; // Clear parity bit, disabling parity (most common)
-  tty.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in
-                          // communication (most common)
-  tty.c_cflag |= CS8;     // 8 bits per byte (most common)
-  tty.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control (most common)
-  tty.c_cflag |= CREAD | CLOCAL; // Turn on READ & ignore ctrl lines (CLOCAL = 1)
+    return floor_number;
+}
 
-  tty.c_lflag &= ~ICANON;
-  tty.c_lflag &= ~ECHO;   // Disable echo
-  tty.c_lflag &= ~ECHOE;  // Disable erasure
-  tty.c_lflag &= ~ECHONL; // Disable new-line echo
-  tty.c_lflag &= ~ISIG;   // Disable interpretation of INTR, QUIT and SUSP
-  tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
-  tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR |
-                   ICRNL); // Disable any special handling of received bytes
+void Serial::close() {
+    if (m_fd != -1) {
+        ::close(m_fd);
+        m_fd = -1;
+    }
+}
 
-  tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g.
-                         // newline chars)
-  tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
+bool Serial::configure(int speed) {
+    struct termios tty;
+    if (tcgetattr(m_fd, &tty) != 0) {
+        cerr << "[SERIAL] Error from tcgetattr: " << strerror(errno) << endl;
+        return false;
+    }
+    cfsetospeed(&tty, speed);
+    cfsetispeed(&tty, speed);
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit characters
+    tty.c_iflag &= ~IGNBRK; // disable break processing
+    tty.c_lflag = 0; // no signaling chars, no echo, no canonical processing
+    tty.c_oflag = 0; // no remapping, no delays
+    tty.c_cc[VMIN] = 0; // read doesn't block
+    tty.c_cc[VTIME] = 5; // 0.5 seconds read timeout
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+    tty.c_cflag |= (CLOCAL | CREAD); // ignore modem controls, enable reading
+    tty.c_cflag &= ~(PARENB | PARODD); // shut off parity
+    tty.c_cflag &= ~CSTOPB;
+    tty.c_cflag &= ~CRTSCTS;
+    if (tcsetattr(m_fd, TCSANOW, &tty) != 0) {
+        cerr << "[SERIAL] Error from tcsetattr: " << strerror(errno) << endl;
+        return false;
+    }
+    return true;
+}
 
-  tty.c_cc[VTIME] = 10; // Wait for up to 1s (10 deciseconds), returning as soon
-                        // as any data is received.
-  tty.c_cc[VMIN] = 0;
+bool Serial::open(const char* portname) {
+    m_fd = ::open(portname, O_RDWR | O_NOCTTY | O_SYNC);
+    if (m_fd < 0) {
+        cerr << "[SERIAL] Error opening " << portname << ": " << strerror(errno) << endl;
+        return false;
+    }
+    return true;
+}
 
-  // Set in/out baud rate to be 9600
-  cfsetispeed(&tty, B9600);
-  cfsetospeed(&tty, B9600);
-
-  // Save tty settings, also checking for error
-  if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
-    std::cout << "Error " << errno << " from tcsetattr: " << strerror(errno)
-              << std::endl;
-  }
-
-  // Allocate memory for read buffer, set size according to your needs
-  char read_buf[256];
-  memset(&read_buf, '\0', sizeof(read_buf));
-
-  // Non-blocking read of 1 byte from the serial port,
-  // read will return as soon as some data is available.
-  int num_bytes = read(serial_port, &read_buf, sizeof(read_buf));
-
-  // Output the data
-  if (num_bytes < 0) {
-    std::cout << "Error reading: " << strerror(errno) << std::endl;
-  } else {
-    std::cout << "Read " << num_bytes
-              << " bytes. Received message: " << read_buf << std::endl;
-  }
-
-  // Close the serial port
-  close(serial_port);
-  return 0;
+int Serial::read(char* buffer, size_t size) {
+    return ::read(m_fd, buffer, size);
 }

@@ -1,16 +1,19 @@
 #include <cstdlib>
+#include <cstring>
 #include <deque>
 #include <stdint.h>
 #include <string>
+#include <termios.h>
 #include <vector>
 
 #include "supervisory_controller.hpp"
 #include "can.hpp"
 #include "queue.hpp"
+#include "serial.hpp"
 
 using namespace std;
 
-void SupervisoryController::run() {
+int SupervisoryController::run() {
     deque<uint8_t> request_queue;
     uint8_t next_floor = 0;
     uint8_t current_floor = 0;
@@ -23,6 +26,14 @@ void SupervisoryController::run() {
     m_database.read_last_website_request();
 
     m_can.open();
+
+    if (!m_serial.open("/dev/ttyACM0")) {
+        return -1;
+    }
+    if (!m_serial.configure(B9600)) {
+        m_serial.close();
+        return -1;
+    }
 
     while (true) {
         // TODO: Ideally, non-blocking since floors can be requested from the website
@@ -90,6 +101,13 @@ void SupervisoryController::run() {
             QueuePrint(request_queue);
         }
 
+        floor_number = m_serial.check_for_request();
+        if (floor_number != 0) {
+            m_database.update_request_history("Voice", floor_number);
+            QueueAdd(request_queue, current_floor - 4, floor_number); // NOTE: -4 converts to true floor number
+            QueuePrint(request_queue);
+        }
+
         if (!request_queue.empty() && !waiting) {
             switch (request_queue.front()) {
                 case 1:
@@ -113,4 +131,7 @@ void SupervisoryController::run() {
     }
 
     m_can.close();
+    m_serial.close();
+
+    return 0;
 }
