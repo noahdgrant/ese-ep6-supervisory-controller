@@ -12,7 +12,6 @@ static void Help();
 static void TestAudio();
 static void TestCan();
 static void TestDatabase();
-static void TestNFC();
 
 int main(int argc, char* argv[]) {
     LoadEnvironmentVariables(".env");
@@ -53,9 +52,9 @@ static void Help() {
 }
 
 static void TestAudio() {
-    system("aplay ../audio/floor1.wav");
-    system("aplay ../audio/floor2.wav");
-    system("aplay ../audio/floor3.wav");
+    system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor1.wav");
+    system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor2.wav");
+    system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor3.wav");
 }
 
 static void TestCan() {

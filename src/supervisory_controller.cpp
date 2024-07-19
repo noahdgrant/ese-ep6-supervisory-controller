@@ -41,15 +41,15 @@ void SupervisoryController::run() {
                 switch(current_floor) {
                     case 0x5:
                         floor_number = 1;
-                        system("aplay ../audio/floor1.wav");
+                        system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor1.wav");
                         break;
                     case 0x6:
                         floor_number = 2;
-                        system("aplay ../audio/floor2.wav");
+                        system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor2.wav");
                         break;
                     case 0x7:
                         floor_number = 3;
-                        system("aplay ../audio/floor3.wav");
+                        system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor3.wav");
                         break;
                     default:
                         break;
