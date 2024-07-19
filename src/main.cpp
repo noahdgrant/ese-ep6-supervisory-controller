@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <termios.h>
+#include <unistd.h>
 
 #include "can.hpp"
 #include "database.hpp"
@@ -142,10 +143,25 @@ static int TestSerial() {
         return -1;
     }
 
-    floor_number = serial.check_for_request();
-    if (floor_number != 0) {
-        printf("Floor number: %d", floor_number);
+    char buffer[256];
+    while (true) {
+        serial.read(buffer, sizeof(buffer));
+        cout << "Buffer: " << buffer << endl;
+
+        for (int i = 0; i < 256; i++){
+            buffer[i] = '\0';
+        }
+
+        usleep(500000);
     }
+
+   // while (true) {
+   //     floor_number = serial.check_for_request();
+   //     if (floor_number != 0) {
+   //         printf("Floor number: %d", floor_number);
+   //     }
+   //     usleep(100000);
+   // }
 
     serial.close();
 
