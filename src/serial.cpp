@@ -21,19 +21,15 @@ uint8_t Serial::check_for_request() {
     } else if (bytes_read == 0) {
         // Do nothing
     } else {
-        if (strcmp(buffer, "one") == 0 ||
-            strcmp(buffer, "two") == 0 ||
-            strcmp(buffer, "three") == 0) {
-            if (strcmp(buffer, "one") == 0) {
-                floor_number = 1;
-            } else if (strcmp(buffer, "two") == 0) {
-                floor_number = 2;
-            } else {
-                floor_number = 3;
-            }
-        } else {
-            cout << "[SERIAL] Read from serial port: " << string(buffer, bytes_read) << endl;
+        if (strcmp(buffer, "one\n") == 0) {
+            floor_number = 1;
+        } else if (strcmp(buffer, "two\n") == 0) {
+            floor_number = 2;
+        } else if (strcmp(buffer, "three\n") == 0 ) {
+            floor_number = 3;
         }
+
+        cout << "[SERIAL] Read from serial port: " << string(buffer, bytes_read);
     }
 
     return floor_number;
