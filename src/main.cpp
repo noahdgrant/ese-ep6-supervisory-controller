@@ -54,7 +54,6 @@ static void Help() {
     cout << "--test-audio" << endl;
     cout << "--test-can" << endl;
     cout << "--test-database" << endl;
-    cout << "--test-nfc" << endl;
     cout << "--test-serial" << endl;
 }
 
@@ -137,14 +136,17 @@ static int TestSerial() {
     if (!serial.open("/dev/ttyACM0")) {
         return -1;
     }
+
     if (!serial.configure(B9600)) {
         serial.close();
         return -1;
     }
+
     floor_number = serial.check_for_request();
     if (floor_number != 0) {
         printf("Floor number: %d", floor_number);
     }
+
     serial.close();
 
     return 0;
