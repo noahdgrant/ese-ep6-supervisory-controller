@@ -11,6 +11,7 @@
 using namespace std;
 
 static string stripNewlines(const string& str);
+static bool startsWith(const string& str, const string& prefix);
 
 uint8_t Serial::check_for_request() {
     uint8_t floor_number = 0;
@@ -25,13 +26,16 @@ uint8_t Serial::check_for_request() {
     } else {
         string str(buffer);
         str = stripNewlines(str);
+        for (int i = 0; i < 256; i++) {
+            buffer[i] = '\0';
+        }
         strcpy(buffer, str.c_str());
 
-        if (strcmp(buffer, "one") == 0) {
+        if (startsWith(buffer, "one")) {
             floor_number = 1;
-        } else if (strcmp(buffer, "two") == 0) {
+        } else if (startsWith(buffer, "two")) {
             floor_number = 2;
-        } else if (strcmp(buffer, "three") == 0 ) {
+        } else if (startsWith(buffer, "three")) {
             floor_number = 3;
         }
 
@@ -94,4 +98,8 @@ static string stripNewlines(const string& str) {
     }
     size_t last = str.find_last_not_of('\n');
     return str.substr(first, (last - first + 1));
+}
+
+static bool startsWith(const string& str, const string& prefix) {
+    return str.compare(0, prefix.size(), prefix) == 0;
 }
