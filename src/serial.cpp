@@ -10,6 +10,8 @@
 
 using namespace std;
 
+static string stripNewlines(const string& str);
+
 uint8_t Serial::check_for_request() {
     uint8_t floor_number = 0;
     int bytes_read;
@@ -21,15 +23,19 @@ uint8_t Serial::check_for_request() {
     } else if (bytes_read == 0) {
         // Do nothing
     } else {
-        if (strcmp(buffer, "one\n") == 0) {
+        string str(buffer);
+        str = stripNewlines(str);
+        strcpy(buffer, str.c_str());
+
+        if (strcmp(buffer, "one") == 0) {
             floor_number = 1;
-        } else if (strcmp(buffer, "two\n") == 0) {
+        } else if (strcmp(buffer, "two") == 0) {
             floor_number = 2;
-        } else if (strcmp(buffer, "three\n") == 0 ) {
+        } else if (strcmp(buffer, "three") == 0 ) {
             floor_number = 3;
         }
 
-        cout << "[SERIAL] Read from serial port: " << string(buffer, bytes_read);
+        cout << "[SERIAL] Read from serial port: " << buffer << endl;
     }
 
     return floor_number;
@@ -79,4 +85,13 @@ bool Serial::open(const char* portname) {
 
 int Serial::read(char* buffer, size_t size) {
     return ::read(m_fd, buffer, size);
+}
+
+static string stripNewlines(const string& str) {
+    size_t first = str.find_first_not_of('\n');
+    if (string::npos == first) {
+        return str;
+    }
+    size_t last = str.find_last_not_of('\n');
+    return str.substr(first, (last - first + 1));
 }

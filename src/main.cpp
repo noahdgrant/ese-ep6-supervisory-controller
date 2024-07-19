@@ -143,8 +143,11 @@ static int TestSerial() {
         return -1;
     }
 
+    cout << "Testing serial connection..." << endl;
+
     while (true) {
-        serial.check_for_request();
+        floor_number = serial.check_for_request();
+        cout << "Floor number: " << floor_number << endl;
         usleep(500000);
     }
 
