@@ -10,13 +10,14 @@
 
 using namespace std;
 
-static string stripNewlines(const string& str);
-static bool startsWith(const string& str, const string& prefix);
+static string StripNewlines(const string& str);
 
 uint8_t Serial::check_for_request() {
     uint8_t floor_number = 0;
-    int bytes_read;
+    int bytes_read = 0;
     char buffer[256];
+
+    memset(&buffer, '\0', sizeof(buffer));
 
     bytes_read = ::read(m_fd, buffer, sizeof(buffer));
     if (bytes_read < 0) {
@@ -24,22 +25,20 @@ uint8_t Serial::check_for_request() {
     } else if (bytes_read == 0) {
         // Do nothing
     } else {
-        string str(buffer);
-        str = stripNewlines(str);
-        for (int i = 0; i < 256; i++) {
-            buffer[i] = '\0';
-        }
-        strcpy(buffer, str.c_str());
+        string stripped_buffer(buffer);
+        stripped_buffer = StripNewlines(stripped_buffer);
 
-        if (startsWith(buffer, "one")) {
-            floor_number = 1;
-        } else if (startsWith(buffer, "two")) {
-            floor_number = 2;
-        } else if (startsWith(buffer, "three")) {
-            floor_number = 3;
-        }
+        if(!stripped_buffer.empty()) {
+            if (stripped_buffer == "one") {
+                floor_number = 1;
+            } else if (stripped_buffer == "two") {
+                floor_number = 2;
+            } else if (stripped_buffer == "three") {
+                floor_number = 3;
+            }
 
-        cout << "[SERIAL] Read from serial port: " << buffer << endl;
+            cout << "[SERIAL] Read from serial port: " << stripped_buffer << endl;
+        }
     }
 
     return floor_number;
@@ -91,15 +90,17 @@ int Serial::read(char* buffer, size_t size) {
     return ::read(m_fd, buffer, size);
 }
 
-static string stripNewlines(const string& str) {
-    size_t first = str.find_first_not_of('\n');
-    if (string::npos == first) {
-        return str;
-    }
-    size_t last = str.find_last_not_of('\n');
-    return str.substr(first, (last - first + 1));
-}
+ static string StripNewlines(const string& str) {
+    // Remove '\r'
+    string result = str;
+    result.erase(remove(result.begin(), result.end(), '\r'), result.end());
 
-static bool startsWith(const string& str, const string& prefix) {
-    return str.compare(0, prefix.size(), prefix) == 0;
+    // Remove '\n'
+    size_t first = result.find_first_not_of('\n');
+    if (string::npos == first) {
+        return "";
+    }
+
+    size_t last = result.find_last_not_of('\n');
+    return result.substr(first, (last - first + 1));
 }
