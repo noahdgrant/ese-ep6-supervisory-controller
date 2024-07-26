@@ -69,6 +69,8 @@ int SupervisoryController::run() {
                 m_database.update_floor_history(floor_number);
                 last_floor = current_floor;
                 waiting = false;
+            } else if (next_floor == current_floor) {
+                waiting = false;
             }
         } else {
             switch (msg.ID) {
