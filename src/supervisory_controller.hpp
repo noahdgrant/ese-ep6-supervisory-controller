@@ -5,6 +5,7 @@
 
 #include "can.hpp"
 #include "database.hpp"
+#include "serial.hpp"
 
 class SupervisoryController {
 public:
@@ -13,11 +14,12 @@ public:
                                                        std::getenv("DATABASE_PASSWORD"),
                                                        std::getenv("DATABASE_SCHEMA")) {};
 
-    void run();
+    int run();
 
 private:
     Can m_can;
     Database m_database;
+    Serial m_serial;
 };
 
 #endif

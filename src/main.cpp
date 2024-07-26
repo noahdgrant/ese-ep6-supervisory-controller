@@ -1,9 +1,12 @@
 #include <iostream>
 #include <stdint.h>
+#include <termios.h>
+#include <unistd.h>
 
 #include "can.hpp"
 #include "database.hpp"
 #include "environment.hpp"
+#include "serial.hpp"
 #include "supervisory_controller.hpp"
 
 using namespace std;
@@ -12,6 +15,7 @@ static void Help();
 static void TestAudio();
 static void TestCan();
 static void TestDatabase();
+static int TestSerial();
 
 int main(int argc, char* argv[]) {
     LoadEnvironmentVariables(".env");
@@ -31,6 +35,8 @@ int main(int argc, char* argv[]) {
             TestCan();
         } else if (cmd == "--test-database") {
             TestDatabase();
+        } else if (cmd == "--test-serial") {
+            TestSerial();
         } else if (cmd == "--help") {
             Help();
         } else {
@@ -49,6 +55,7 @@ static void Help() {
     cout << "--test-audio" << endl;
     cout << "--test-can" << endl;
     cout << "--test-database" << endl;
+    cout << "--test-serial" << endl;
 }
 
 static void TestAudio() {
@@ -121,4 +128,30 @@ static void TestDatabase() {
     char request_method[] = "FloorOneController";
     database.update_request_history(request_method, floor_number);
     printf("Inserted into request history: method = %s floor number = %d\n", request_method, floor_number);
+}
+
+static int TestSerial() {
+    Serial serial;
+    int floor_number = 0;
+
+    if (!serial.open("/dev/ttyACM0")) {
+        return -1;
+    }
+
+    if (!serial.configure(B9600)) {
+        serial.close();
+        return -1;
+    }
+
+    cout << "Testing serial connection..." << endl;
+
+    while (true) {
+        floor_number = serial.check_for_request();
+        cout << "Floor number: " << floor_number << endl;
+        usleep(500000);
+    }
+
+    serial.close();
+
+    return 0;
 }
