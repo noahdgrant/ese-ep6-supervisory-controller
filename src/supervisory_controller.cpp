@@ -48,29 +48,34 @@ int SupervisoryController::run() {
 
         if (msg.ID == ELEVATOR_CONTROLLER) {
             current_floor = msg.DATA[0];
-            if (next_floor == current_floor && current_floor != last_floor) {
-                switch(current_floor) {
-                    case 0x5:
-                        floor_number = 1;
-                        system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor1.wav");
-                        break;
-                    case 0x6:
-                        floor_number = 2;
-                        system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor2.wav");
-                        break;
-                    case 0x7:
-                        floor_number = 3;
-                        system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor3.wav");
-                        break;
-                    default:
-                        break;
-                }
+            if (next_floor == current_floor) {
+                if (current_floor != last_floor) {
+                    waiting = false;
 
-                m_database.update_floor_history(floor_number);
-                last_floor = current_floor;
-                waiting = false;
-            } else if (next_floor == current_floor) {
-                waiting = false;
+                    // Only play sound and update database when the elevator first
+                    // arrives at the new floor. This stops the sound playing and
+                    // database being updated if the elevator was already at the
+                    // requested floor.
+                    switch(current_floor) {
+                        case 0x5:
+                            floor_number = 1;
+                            system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor1.wav");
+                            break;
+                        case 0x6:
+                            floor_number = 2;
+                            system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor2.wav");
+                            break;
+                        case 0x7:
+                            floor_number = 3;
+                            system("aplay ~/Projects/ese-ep6-supervisory-controller/audio/floor3.wav");
+                            break;
+                        default:
+                            break;
+                    }
+
+                    m_database.update_floor_history(floor_number);
+                    last_floor = current_floor;
+                }
             }
         } else {
             switch (msg.ID) {
